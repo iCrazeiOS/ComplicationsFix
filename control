@@ -1,9 +1,9 @@
 Package: com.icraze.complicationsfix
 Name: ComplicationsFix
-Version: 1.0
+Version: 2.0
 Architecture: iphoneos-arm
-Description: Fix Complications tweak on iOS 15 (and maybe 16)
+Description: Fix Complications tweak on iOS 15-16
 Maintainer: iCraze
-Author: iCraze
+Author: iCraze & AlexBurneikis
 Section: Tweaks
 Depends: mobilesubstrate (>= 0.9.5000), firmware (>= 15.0)
