@@ -53,13 +53,33 @@ static NSNumber *yOffset = nil;
 
 
 
+%group RootlessPatch
+%hook UIImage
++(UIImage *)imageNamed:(NSString *)arg1 {
+	if ([arg1 hasPrefix:@"/var/mobile/Library/Preferences/Complications/"]) {
+		return %orig([@"/var/jb" stringByAppendingString:arg1]);
+	}
+	return %orig;
+}
+%end
+%end
+
+
+
 %ctor {
 	%init(CrashFix);
 
-	// find Complications.dylib and load it, before initialising the remaining hooks
-	NSString *path = @"/Library/MobileSubstrate/DynamicLibraries/Complications.dylib"; // regular
+	// Complications stores its images in /var/mobile/Library/Preferences for some reason????
+	// Rootless tweak repackers move these files to /var/jb/var/mobile/Library/Preferences
+	// If the file exists in the rootless location, we need to redirect the path the tweak tries to load
+	if ([[NSFileManager defaultManager] fileExistsAtPath:@"/var/jb/var/mobile/Library/Preferences/Complications/Alarm.png"]) {
+		%init(RootlessPatch);
+	}
+
+	// Find Complications.dylib and load it, before initialising the remaining hooks, as they need to be loaded after Complications
+	NSString *path = @"/Library/MobileSubstrate/DynamicLibraries/Complications.dylib"; // Rootful
 	if (![[NSFileManager defaultManager] fileExistsAtPath:path]) {
-		path = @"/var/jb/Library/MobileSubstrate/DynamicLibraries/Complications.dylib"; // rootless
+		path = @"/var/jb/Library/MobileSubstrate/DynamicLibraries/Complications.dylib"; // Rootless
 	}
 	if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
 		void *handle = dlopen([path UTF8String], RTLD_LAZY);
